@@ -24,7 +24,7 @@ rtc = RTC()
 buzzer = PWM(Pin(18))
 
 #### Constantes
-accSeuil = 2
+accThreshold = 1
 
 #### Fonctions
 
@@ -52,7 +52,7 @@ if __name__ == '__main__':
     sample=0
 
     InitBoard()
-    file = open("Data.txt","a")
+    fileOut = open("Data.txt","w")
     
     while True:
         #buzzer.duty_u16(1000)
@@ -67,12 +67,12 @@ if __name__ == '__main__':
             
             # Acquisitions des capteurs
 
-            x, y, z = imu.read_magnetometer_data()
+            mx, my, mz = imu.read_magnetometer_data()
             ax, ay, az, gx, gy, gz = imu.read_accelerometer_gyro_data()
             # acc = icm20948.accelerometer
             # gyro = icm20948.gyrometer
             # mag = icm20948.magnetometer
-            pression = lps22.pressure
+            pressure = lps22.pressure
             temp = lps22.temperature
 
             # DEBUG : Mesure temps execution
@@ -80,17 +80,19 @@ if __name__ == '__main__':
             print('\rAcq time = %.3f ms\r'%(delta/1000))
             
 
-            if acc[1]>accSeuil:
+            if ay > accThreshold:
                 # buzzer.freq(1000)
                 isLaunched=True
+                fileOut.write(str(rtc.datetime())+'\n')
                 print('Lift off')
+
+
             if isLaunched==True:
                 # DEBUG : Mesure temps execution
                 t = time.ticks_us()
-
                 
-                data = str(sample)+" "+str(pression)+" "+str(temp)+" "+str(acc[0])+" "+str(acc[1])+" "+str(acc[2])+"\n"
-                file.write(data)
+                data = "{:d} {:.1f} {:.1f} {:.2f} {:.2f} {:.2f}\n".format(sample, pressure, temp, ax, ay, az)
+                fileOut.write(data)
                 # file.close()
 
                 # DEBUG : Mesure temps execution
@@ -98,12 +100,12 @@ if __name__ == '__main__':
                 print('\rWrite time = %.3f ms\r'%(delta/1000))
             isSampling=False   
     #         print("\r\n /-------------------------------------------------------------/ \r\n")
-    #         print(rtc.datetime())
-            print('\rAcceleration:  X = %5.2f , Y = %.2f , Z = %.2f\r'%(acc[0],acc[1],acc[2]))  
-    #         print('\rGyroscope:     X = %.2f , Y = %.2f , Z = %.2f\r'%(gyro[0],gyro[1],gyro[2]))
-    #         print('\rMagnetic:      X = %.2f , Y = %.2f , Z = %.2f\r'%((mag[0]),mag[1],mag[2]))
-    #         print('\rPressure:     P = %.2f\r'%(pression))
-    #         print('\rTemperature:  T = %.2f\r'%(temp))
+            print(rtc.datetime())
+            print('\rAcceleration:  X = {:.2f} , Y = {:.2f} , Z = {:.2f}\r'.format(ax, ay, az))  
+            print('\rGyroscope:     X = {:.2f} , Y = {:.2f} , Z = {:.2f}\r'.format(gx, gy, gz))
+            print('\rMagnetic:      X = {:.2f} , Y = {:.2f} , Z = {:.2f}\r'.format(mx, my, mz))
+            print('\rPressure:      P = {:.2f}\r'.format(pressure))
+            print('\rTemperature:   T = {:.2f}\r'.format(temp))
           
       
 
