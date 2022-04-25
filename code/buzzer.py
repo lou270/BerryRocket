@@ -1,5 +1,5 @@
-from machine import Pin,PWM,Timer
 import time
+from machine import Pin,PWM,Timer
 
 # Declaration d'un PWM pour le buzzer
 buzzer = PWM(Pin(18))
